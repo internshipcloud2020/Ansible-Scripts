@@ -1,0 +1,116 @@
+---------------------------------------------------------------
+# variables.tf
+---------------------------------------------------------------
+variable "access_key" {}
+variable "secret_key" {}
+variable "aws_region" {
+  default = "us-west-1"
+}
+
+variable "aws_ami" {
+  type = "map"
+  default = {
+    us-wast-1 = "ami-30ac647"
+    us-east-2 = "ami-45b6y7f"
+    eu-west-1 = "ami-8321e34"
+  }
+}
+
+variable "path_to_public_key" {
+  default = "$file("./home/desktop/mykey.pub")"
+}
+variable "path_to_private_key" {
+  default = "$file("./home/desktop/mykey")"
+}
+
+
+---------------------------------------------------------------
+# main.tf
+---------------------------------------------------------------
+provider "aws" {
+    access_key = "$(var.aws_instance.my_server.access_key)"
+    secret_key = "$(var.aws_instance.my_server.secret_key)"
+}
+
+resource "aws_instance" "my_server" {
+ ami = "$(lookup(var.aws_ami, var.aws_region))"
+ instance_type = "t2.micro"
+ count = 2
+}
+
+ 
+-------------------------------------------------------------------
+# provisioner_elb.tf
+-------------------------------------------------------------------
+
+resource "aws_key_pair" "mykey" {
+  key_name = "mykey"
+  public_key = "${file("${var.PATH_TO_PUBLIC_KEY}")}"
+}
+
+resource "aws_elb" "myelb" {
+  name = "myelb"
+  subnets = ["${aws_subnet.main-public-1.id}", "${aws_subnet.main-public-2.id}"]
+  security_groups = ["${aws_security_group.elb-securitygroup.id}"]
+ listener {
+    instance_port = 80
+    instance_protocol = "http"
+    lb_port = 80
+    lb_protocol = "http"
+  }
+  health_check {
+    target = "HTTP:80/"
+    interval = 30
+  }
+
+    provisioner "file" {
+    source = "script.sh"
+    destination = "/tmp/script.sh"
+  }
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/script.sh",
+      "sudo /tmp/script.sh"
+      "sudo -i apache2 hhtpd"
+    ]
+  }
+
+  connection {
+    user = "${var.instance_username}"
+    private_key = "${file("${var.path_to_private_key}")}"
+  }
+}
+
+
+
+-------------------------------------------------------------------
+# security_group.elb.tf
+-------------------------------------------------------------------
+resource "aws_security_group" "elb-securitygroup" {
+  vpc_id = "${aws_vpc.main.id}"
+  name = "elb"
+  description = "security group elb"
+  egress {
+      from_port = 0
+      to_port = 0
+      protocol = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+      from_port = 80
+      to_port = 80
+      protocol = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+  } 
+  tags {
+    Name = "elb"
+  }
+}
+
+
+-----------------------------------------------------------------
+bash
+-------------------------------------------------------------------
+ssh-keygen -t rsa -b 4096 -f mykey
+
