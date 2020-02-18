@@ -1,0 +1,63 @@
+provider "aws" {
+
+access_key=""
+security_key=""
+region= "us-east-1"
+}
+
+
+resource "aws_instance_EC2 "resource_1 " {
+
+ami="${lookup(var.resource_1,var.aws_region)}"
+instance_type="t2.micro"
+
+}
+resource "aws_route" "ELB" {
+
+route_table_id="($aws_vps)
+destination_cidr_block="0.0.0.0/0"
+}
+resource "aws_vps" "main"{
+  cidr_block="172.255.255.255"
+}
+
+resource "aws_gate_default"{
+destination_cidr_block="0.0.0.0/0"
+
+}
+
+  resource "aws_instance" "web_server" {
+connection {
+ user="username"
+  host="hostname"
+}
+}
+
+
+variable "aws_access_key" {}
+variable "aws_security_key" {}
+variable "aws_region_1" {
+ default="us-east-1"
+}
+
+data "template file" "server1" {
+
+template="$$(aws.default.id)"
+vars  {
+name="2tier"
+destination_cidr_block="0.0.0.0/0"
+
+}
+}
+provisioner "server"
+{
+inline={
+ "sudo -y update"
+sudo -y start module"
+}
+}
+connection {
+type="ssh"
+user="ec_user"
+private_key="$file(pathname of the file)"
+}
