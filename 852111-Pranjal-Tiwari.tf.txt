@@ -1,0 +1,90 @@
+#provider.tf
+provider "aws" {
+ access_key = "${var.aws_access_key}"
+ secret_key = "${var.aws_secret_key}"
+ region = “${var.aws_region}”
+}
+
+
+resource "aws_instance" "instance_ss"{
+ ami = "ami-xxxxxxxxx"
+ instance_type ="t2.micro"
+count = "2"
+}
+
+resource "aws_elb" "load_balancer"{
+name = "test_elb"
+  instance = ["$(instance_ss)","$(instance2)"]
+  security_groups = ["${aws_security_group.elb-securitygroup.id}"]
+ security_groups = ["${aws_security_group.my_app_sec_group}"]
+ listener {
+ instance_port = 80
+ instance_protocol = "http"
+ lb_port = 80
+ lb_protocol = "http"
+
+}
+
+resource "aws_key_pair" "key"{
+	key_name = "aws_key"
+	public_key = "${file("/home/test/aws_key.pub")}"
+}
+
+
+
+
+#variables.tf
+variable "aws_access_key"{
+default = "accessKey"
+}
+variable "aws_secret_key"{
+default = "secretKey"
+}
+variable "region"{
+default = "us-east-1"
+}
+resource "aws_security_group" "my_app_sec_group"
+{ 
+
+ ingress 
+{
+ 	from_port = 0
+ 	to_port = 22
+ 	protocol = "tcp"
+ 	cidr_blocks = ["0.0.0.0/0"]
+ 	}
+ingress 
+{
+ 	from_port = 0
+ 	to_port = 80
+ 	protocol = "http"
+ 	cidr_blocks = ["0.0.0.0/0"]
+ }
+
+ egress
+{
+ 	from_port = 0
+ 	to_port = 0
+ 	protocol = "-1"
+ 	cidr_blocks = ["0.0.0.0/0"]
+ } 
+}
+
+
+provisoner " "
+connection{
+type = "ssh"
+user = "ec2_user"
+private_key = "${file("/home/test/aws_key.rsa")}"
+}
+provisoner "remote_exec"{
+	inline = "install apache server"
+}
+
+
+#var_value.tfvars
+aws_access_key = "generated_access_key"
+aws_secret_key = "generated_secret_key"
+
+
+ssh -keygen -t rsa -p 4444 -f aws_key
