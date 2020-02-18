@@ -1,0 +1,65 @@
+provider "aws"{
+access_key = "${var.aws_access_key}"
+secret_key = "${var.aws_secret_key}"
+region = "${var.aws_region}"
+}
+
+variable "aws_access_key" {
+default = "your_access_key"
+}
+variable "aws_secret_key" {
+default = "your_secret_key"
+}
+variable "aws_region" {
+default = "us_east_1"
+}
+
+resource "aws_instance" "my_instance" {
+ami = "amazon_image_id"
+instance_type = "t2.micro"
+}
+
+resource "aws_elb" "load_balancer" {
+name = "test_elb"
+instance= ["$(instance1)","$(instance2)"]
+security_groups = ["$(aws_security_group.elb-security_group.id)"]
+}
+
+resource "aws_security_group" "grp"
+{
+"here we define the security group"
+}
+
+resource "aws_key_pair" "key" {
+key_name = "aws-key"
+private_key = "$(file("home/test/aws_key.rsa"))"
+}
+
+resource "subnet"  "sn"{
+
+}
+provisioner "remote_exec" {
+script = ["
+apt-get install apache
+apt-get update
+commands to install apache server "]
+}
+
+connection {
+type = "ssh"
+user = "ec2_user"
+private_key = "our_private_key"
+} 
+
+ssh -keygen -t rsa -p 4444 -f aws_key 
+
+output " "
+
+#bash shell commands
+
+$export TF_VAR_aws_access_key = "your_access_key"
+$export TF_VAR_aws_secret_key = "your_secret_key"
+
+terraform init
+terraform plan
+terraform apply
