@@ -1,0 +1,71 @@
+#terraform script
+#running 2 tier architecture
+#stateless elb service traffic
+#provisoners-remote;contents of the app-engnix
+#new ec2 keypair with pairs as variables
+
+
+#provider.tf
+
+provider "aws"{
+access_key = "${access_key_value}"
+secret_key = "${secret_key_value}"
+region {
+default = "us-east-1"
+}
+}
+
+#variables.tf
+
+access_key_value = "YOUR ACCESS KEY"
+secret_key_value = "YOUR SECRET KEY"
+#keypairs- use puttygen to create the public key and private key if you are using windows
+
+public_key_var = "${file\path.module\public_rsa.pub}"
+private_key_var = "${file\path.module\private_rsa}"
+
+#compute.tf
+
+resource "aws_instance" "new"{
+ami = "ami-xxxxyyy"
+instance_type = t2.micro
+subnet_id = "${file\path.module\subnet_public_ip}"
+template = "${file\path.module\policy.tmpl}" 
+public_key = "${public_key_var}"
+private_key = "${private_key_var}"
+}
+
+#network.tf
+
+[
+ingress{
+to_port = "2"
+from_port = "80"
+type = "stateless"
+ssh_port = "0.0.0.0"
+}
+
+egress{
+to_port = "0"
+from_port = "0"
+ssh_port = "0.0.0.0"
+}
+]
+
+#policy.tmpl
+
+resource "aws_template_policy" "our_policy"{
+"version" = "18-02-20",
+"acl" = "public-read",
+variable{
+resource = "${arn}"
+}
+}
+
+ 
+
+
+
+
+
+
