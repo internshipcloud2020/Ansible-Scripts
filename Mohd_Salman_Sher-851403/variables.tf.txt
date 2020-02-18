@@ -1,0 +1,23 @@
+variable "aws_access" {}
+variable "aws_private" {}
+variable "region" {
+  default = "us-east-1"
+}
+variable "amis" {
+  type = "map"
+  default = {
+    "us-east-1" = "ami-851403"
+  }
+}
+
+variable "private" {
+  default = "appkey"
+}
+
+variable "access" {
+  default = "appkey"
+}
+
+variable "user" {
+  default = "xyz"
+}

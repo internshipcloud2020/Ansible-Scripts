@@ -1,0 +1,5 @@
+provider "aws" {
+    access_key = "${var.key_generated_to_access_aws_server}"
+    secret_key = "${var.private_key_provided_by_aws}"
+    region = "${var.deployment_region}"
+}
