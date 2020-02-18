@@ -1,0 +1,43 @@
+provider "aws"{
+    access_key=""
+    secret_key=""
+    region="us-east-1"
+}
+resource "aws_instance" "web_server" {
+key_name = "${aws_key_pair.deployerkeypair.
+key_name}"
+}
+resource "aws_instance" "ami_loadbalancer"{
+    ami="ami_5347d5a5"
+    instance_type="t2.micro"
+    provisioner "self_prov"{
+        source="/conf/my-app.conf"
+        destination="/etc/config/my-app.conf"
+        type="ssh"
+        user_data {
+            username="${var.username}"
+            password="${var.password}"
+            host="${var.host}"
+        }
+
+    }
+}
+variable "aws_access_key"{}
+variable "aws_secret_key"{}
+variable "region"{
+    default="us-east-1"
+}
+variable "username"{
+    default="admin"
+}
+variable "password"{
+    default="xxxxxx"
+}
+variable "host"{
+    default="10.1.1.12"
+}
+varaiable "aws_amis"{
+    "us-east-1"=""
+    "us-west-1"=""
+}
+
