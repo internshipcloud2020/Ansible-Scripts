@@ -1,0 +1,51 @@
+/*       Variables.tf                 */
+variable "aws_access_key" {}
+variable "aws_secret_key" {}
+variable "aws_region" { 
+         default="us-east-1"
+}
+variable webserver_ami {
+        type="map"
+}
+
+/*      Terraform.tfvars                */
+webserver_ami {
+         "us-east-1"="ami-b374d5a5"     /* not exact region to ami_code mapping */
+         "us-west-1"="ami-865ce534"
+         "ap-south-1"="ami-65fdb6g4"
+}
+
+/*      Provider.tf                       */
+
+provider "aws" {
+         access_key="${var.aws_access_key}"
+         secret_key="${var.aws_secret_key}"
+         region="${var.aws_region}"
+}
+
+/*          Compute.tf                 */
+resource "aws_instance" "web_server" {
+        ami="${lookup(var.webserver_ami,var.aws_region)}"
+        instance_type="t2.micro"
+}
+
+In the terminal , type following lines one-by-one and enter 
+root@root ~] export TF_VAR_aws_access_key="gfUY6788T254J" /* not exact values */
+root@root ~] export TF_VAR_aws_secret_key="ut43DRGH56y345w65q75edJ62nfgTERI2486"
+
+/*               Policy.tpl              */
+ { "Service" : 
+       [  "Status" : "Allow"
+        {  
+      default=[  "DescribeInstances" , "DescribeStatus" , "DescribeImages" , "DescribeSnapShots"  ]
+     }
+    ]
+ }
+ 
+       
+
+/*             Provisioner.tf                 */
+provisioner "template" {
+                  path="${path/to/policy.tpl}"
+                  
+}       
