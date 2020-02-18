@@ -1,0 +1,83 @@
+#------- SOURCES -------
+
+provider "aws" "webserver" {  							- 5
+
+  access_key = {}
+  secret_key = {}
+  region = "${var.region}"
+  ami = "${lookup[var.aws_amis , var.region]}"
+  type = "t2.micro"
+
+}
+
+data "template_file" "webserve_template" {
+
+  template = "${file("${path.module}/app_access.tpl")}"
+  vars {
+    arn = "${aws_instance.web_server.arn}"
+  }
+}
+
+connection {
+ 
+  type = "ssh"
+  user = "ec2-user"
+  private_key = "${file("${path.module}/awa_rsa")}"
+
+}
+
+output "public_ips"{
+
+value = "${aws_instances.webserver.*.public_ip}"
+
+}
+ 
+
+
+#------- DATA VARS -------  datas.tfvars
+
+var "aws_amis"{									- 7									
+
+  type = "map"
+  amis = { Region1 : ami1,
+	   Region2 : ami2,
+	   Region3 : ami3 }  
+
+}
+
+resource "aws_security_group" "web_server_sec_group" {				- 17
+	ingress {
+		from_port = 0
+		to_port = 22
+		protocol = "tcp"
+		cidr_blocks = ["0.0.0.0"]
+		}
+	egress {
+		from_port = 0
+		to_port = 0
+		protocol = "-1"
+		cidr_blocks = ["0.0.0.0"]
+		}
+}
+
+#------- TEMPLATE -------   app_access.tpl
+
+template "app" {
+ Version : "version_number"
+ "Statement": [{"Effect": "Allow",
+     "Action": ["ec2:Descrideinstances","ec2:Describeiterations"],
+     "Resource": "${arn}" }]
+
+}
+ 
+
+
+#------- PROVISIONER ------- To deploy the app
+ 
+provisioner "deploy_app" {							- 5
+ 
+  source = "${path.module}/app_name"
+  destination = "$(file"(${path.module}/source.tf)")"
+  inline = [ "chmod +x ${destination}" , "${destination}" ]
+
+}
