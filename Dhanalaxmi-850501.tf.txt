@@ -1,0 +1,87 @@
+#to choose the provider
+provider "aws"
+{
+access_key="$(var.access_key)"
+secret_key="$(var.secret_key)"
+region= "$(var.aws_region)"
+}
+
+
+
+# choose the resource
+resource "aws_instance" "ec2"
+{
+ami = "${lookup(var.aws_amis, var.aws_region)}"
+instance_type = "t2.micro"
+
+}
+
+
+
+resource "aws_vpc" "default" {
+  cidr_block = "10.0.0.0/32"
+  
+}
+
+
+resource "aws_elb" "tt"{
+# to access SSH from everywhere
+ingress
+{
+from_port=80
+to_port=80
+protocol="tcp"
+cidr_blocks=["0.0.0.0/0"]
+}
+
+
+
+#to outbound
+egress{
+from_port=0
+to_port=0
+protocol="-1"
+cidr_blocks=["0.0.0.0/0"]
+}
+}
+
+
+
+data "template_file" "nginx" 
+{
+template = "${file("${path.module}/init.tpl")}"
+vars {
+arn = "${aws_instance.web_server.arn}"
+}
+}
+
+
+resource "aws_key_pair" "keys"
+{
+  key_name   = "${var.key_name}"
+  public_key = "${file(var.public_key)"
+}
+
+
+#assigning variables
+variable "access_key"{}
+variable "secret_key"{}
+
+variable "region"
+{
+default="us-east-1"
+}
+variable "key_name"
+{
+  default = "${aws_key_pair.keys.id}"
+}
+
+provisioner "remote-exec" {
+inline = ["sudo apt-get -y install nginx"]
+  }
+
+
+#commands to be run
+terraform init
+terraform plan
+terraform apply
