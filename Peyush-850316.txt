@@ -1,7 +1,7 @@
 /*       Variables.tf                 */
-variable aws_access_key {}
-variable aws_secret_key {}
-variable aws_region { 
+variable "aws_access_key" {}
+variable "aws_secret_key" {}
+variable "aws_region" { 
          default="us-east-1"
 }
 variable webserver_ami {
@@ -49,13 +49,3 @@ provisioner "template" {
                   path="${path/to/policy.tpl}"
                   
 }       
-
-
-At last , go to terminal enter following commands 
-       terraform validate
-       terraform init 
-       terraform plan 
-       terraform plan -var 'aws_region=eu-central-1' /* if we wish to assign availability zones dynamically */
-       terraform apply
-       terraform apply -var 'aws_region=eu-central-1' /* if we wish to build instances in availability zones chosen dynamically */
-       terraform destroy           /* terminate default us-east-1 instance */
