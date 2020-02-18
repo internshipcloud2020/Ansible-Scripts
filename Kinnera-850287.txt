@@ -1,0 +1,43 @@
+//850287- B.KINNERA 
+
+//provider.tf
+provider "aws" {
+access_key = "${var.architecture_access_key}"
+secret_key = "${var.architecture_secret_key}"
+region = “${var.aws_region}”
+}
+
+//variable.tf
+variable "aws_access_key" {}
+variable "aws_secret_key" {}
+variable "aws_region" {
+default = "india-south"
+}
+
+variables "two_tier"{
+${"applicaiton_layer" = "aminumber1"}
+${"developement_layer" = "aminumber2"}
+}
+
+//architecture.tf
+resource "aws_instance" "two_tier" {
+ami = "${(var.application_layer, var.development_layer)}"
+instance_type = "t2.micro"
+}
+
+
+//architecture.tpl
+{
+"Version": "version1.0.0",
+"Statement": {
+"Action": ("ec2:describeInstances")
+"Resource": "${arn}"
+}
+
+//create directory
+$ mkdir ~/architecture/*.tf
+
+//provisioners.tf
+{
+
+}
