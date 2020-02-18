@@ -1,0 +1,144 @@
+variables.tf
+variable aws_access_key{}
+variable aws_secret_key{}
+variable aws_region{
+default="us-east-1"
+}
+
+
+#environment variables for access key and secret key
+export TF_VAR_aws_access_key=" "
+export TF_VAR_aws_secret_key=" "
+
+
+provider.tf
+provider "aws"{
+access_key="${aws_access_key}"
+secret_key="${aws_secret_key}"
+region="${aws_region}"
+}
+
+data "aws_instance" "web"
+{
+instance_tags{
+Role="web_server"
+}
+instance_state=["running". "stopped"]
+}
+
+
+
+
+
+
+
+
+resource "aws_vpc" "default" {
+  cidr_block = " "
+}
+
+resource "aws_internet_gateway" "default" {
+  vpc_id = " "
+}
+
+
+
+resource "aws_subnet" "default" {
+  vpc_id                  = " "
+  cidr_block              = " "
+  
+}
+
+resource "aws_security_group" "elb" {
+  name        = " "
+  
+  vpc_id      = " "
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+
+
+resource "aws_elb" "web" {
+  name = " "
+
+  subnets         = ["${aws_subnet.default.id}"]
+  security_groups = ["${aws_security_group.elb.id}"]
+  instances       = ["${aws_instance.web.id}"]
+
+  
+}
+
+#generate key pair 
+ssh-keygen -t rsa -b 4096 -f aws_rsa
+
+
+resource "aws_key_pair" "auth" {
+  key_name   = "${var.env}-key"
+  public_key = "/path/to/key"
+}
+
+resource "aws_instance" "web" {
+  connection {
+    user = "ec2"
+    private_key = "${tls_private_key.two-tier.private_key_pem}"
+  }
+
+  instance_type = "t2.micro"
+  ami = ""
+  key_name = ""
+  vpc_security_group_ids = ["${aws_security_group.default.id}"]
+  subnet_id = "${aws_subnet.default.id}"
+  
+  
+  provisioner "remote-exec" {
+    inline = [
+      install nginix
+    ]
+  }
+}
+
+resource "aws_default_subnet" "subnet_id"
+{ 
+
+}
+
+#implicit dependency
+subnet_id="${aws_default_subnet.subnet_id.id}
+
+#to verify connection
+ssh -i aws_rsa ec2user ip_address
+
+
+terraform 
+{
+ backend "S3"
+ {
+  bucket="Bucket_name"
+  key="path/to/key"
+  region="us-east-1"
+ }
+} 
+
+module "vpc"
+{
+ scource=" "
+ name="vpc_module"
+ cidr=" "
+ private_subnet=[     ]
+ public_subnet=[     ]
+ enable_nat_gateway="true"
+ enable_vpn_gateway='true"
+}
