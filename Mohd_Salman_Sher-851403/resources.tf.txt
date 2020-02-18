@@ -9,11 +9,11 @@ resource "aws_instance" "demo" {
   name = "${aws_key.Appkey.name}"
   
  resource "aws_elb" "web" {
-  name = "terraform-example-elb"
+  name = "terraform-elb"
 
-  subnets         = ["${aws_subnet.default.id}"]
-  security_groups = ["${aws_security_group.elb.id}"]
-  instances       = ["${aws_instance.web.id}"]
+  subnets         = ["${0.0.0.0/0}"]
+  security_groups = ["${12345}"]
+  instances       = ["${in456tc}"]
 
   listener {
     instance_port     = 80
