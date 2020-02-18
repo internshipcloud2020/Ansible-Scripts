@@ -1,0 +1,76 @@
+provider "aws" {
+    access_key="aws-access_key"
+    secretr_key="aws-secret_key"
+    region="us-east-1"
+}
+
+#vpc
+
+resource "aws_vps" "default" {
+    cider_block= "10.0.0.0/10"
+}
+
+#nternet gateway
+
+resource "aws_internet_gateway" "default" {
+    vpc_id="$(aws_vps.default.id)"
+}
+
+#vpc gateway access 
+
+resource "aws_route" "internet_access" {
+    route_table_id = "$(aws_vps.default.main_route_table_id)"
+    destinatiopn_cidr_block = "0.0.0.0/0"
+    gateway_id= "$(aws_internet_gateway.default.id)"
+}
+
+#to access ELB
+
+resource "aws_security_group" "ELB" {
+
+    name= "two_tier_arch"
+    vpc_id="$(aws_vps.default.id)"
+
+    ingress {
+        from_port = 80
+        to_port = 80
+        protocol= "tcp"
+        cider_block = "0.0.0.0/0"
+    }
+
+    egress {
+        from_port = 0
+        to_port = 0
+        protocol= "-1"
+        cider_block = "0.0.0.0/0"
+    }
+
+}
+
+
+resource "aws_instance" "web_server" {
+
+    connection {
+        user = "username"
+        host= "hostname"
+    }
+
+}
+
+provisioner "server" {
+    inline = [
+        "sudo -y update"
+        "sudo service start"
+    ]
+}
+
+data "template file" "server" {
+    template= "$${username},$${public_key}"
+    
+    vars{
+        username="local"
+        public_key="local_key"
+    }
+}
+
+
