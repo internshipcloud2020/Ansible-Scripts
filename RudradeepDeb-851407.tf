@@ -143,6 +143,13 @@ variable "AMIS" {
   }
 }
 
+provisioner "remote-exec"{
+      inline=[
+          "sude apt-get update -y",
+          "sudo apt-get install nginx",
+          "~/scripts.sh"
+      ]
+  }
 output "ELB" {
 	value = "${aws_elb.my-elb.dns_name}"
 }
