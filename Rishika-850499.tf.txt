@@ -1,0 +1,114 @@
+variables.tf
+
+variable "aws_access_key" {}
+variable "aws_secret_key" {}
+variable "aws_region" {
+default = "us-east-1"
+}
+
+
+
+----------------------------------------
+main.tf
+
+provider "aws" {
+access_key = "${var.aws_access_key}"
+secret_key = "${var.aws_secret_key}"
+region = “${var.aws_region}”
+}
+
+resource "aws_instance" "test"{
+	ami=" "
+	intstance_type="t2.micro"
+	key_name = "${aws_key_pair.authentication.id}"
+	vpc_security_group_ids = ["${aws_security_group.elb.id}"]
+	subnet_id = "${aws_subnet.default.id}"
+provisioner "remote-exec" {
+
+    inline = [
+
+      "sudo apt-get -y install nginx",
+
+      "sudo apt-get -y upadate",
+
+
+    ]
+
+  }
+
+}
+
+
+resource "aws_vpc" "eg" {
+
+  cidr_block = [" 1.0/0.0/24"]
+
+}
+resource "aws_subnet" "default" {
+
+  vpc_id                  = "${aws_vpc.eg.id}"
+
+  cidr_block              = ["1.0/0.0/24 "]
+
+}
+
+
+resource "aws_security_group" "elb" {
+
+ 
+
+  vpc_id      = "${aws_vpc.eg.id}"
+
+
+  ingress {
+
+    from_port   = 80
+
+    to_port     = 80
+
+    protocol    = "tcp"
+
+    cidr_blocks = ["0.0.0.0/0"]
+
+  }
+
+
+  egress {
+
+    from_port   = 0
+
+    to_port     = 0
+
+    protocol    = "-1"
+
+    cidr_blocks = ["0.0.0.0/0"]
+
+  }
+
+}
+
+resource "aws_elb" "ser" {
+
+  
+
+
+
+  subnets         = ["${aws_subnet.default.id}"]
+
+  security_groups = ["${aws_security_group.elb.id}"]
+
+  instances       = ["${aws_instance.ser.id}"]
+
+
+
+  }
+
+}
+
+resource "aws_key_pair" "authentication" {
+
+  key_name   = "${var.key_name}"
+
+  public_key = "${file(var.public_key_path)}"
+
+}
