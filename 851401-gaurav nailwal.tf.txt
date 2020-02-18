@@ -1,0 +1,98 @@
+# template for running a 2 tier arc
+# stateless app
+
+VARIABLES :
+
+variables "aws_access_key"{}
+
+variables "aws_secret_key"{}
+
+connection {
+
+	type = "ssh"
+	port = 22
+	user = "ec2_user"
+	private_key = "put private key"
+	
+}
+
+resources "aws_instance" "my_instance"{
+
+	ami = "put ami id"
+	instance = "t2.micro"
+
+}
+resources "aws_instance" "my_instance"{
+
+	ami = "put ami id"
+	instance = "t2.micro"
+
+}
+
+resources "route" "rout"{
+
+	route = 10.0.2.1
+}
+resources "subnet" "sub"{
+
+	subnet	= 10.0.2.1/24
+}
+resources "gateway" "gat"{
+
+	gateway =10.0.2.1
+}
+resource "aws_key_pair" "kp"{
+	key_name= "aws_key" 
+	private_key = "${file("path of the file")}"
+}
+
+
+resource "aws_elb" "load balancer"{
+
+	name = "test_elb"
+	
+	instance = ["$(instance1)","$(indtance2)"]
+
+	security_group = ["$(aws_security_group.elb_security_group.id)"]
+}
+
+
+resource "aws_security_group" "grp"{
+	
+	"here we define the aws security group"	
+
+}
+
+resource "elb_security_group" "elb-grp"{
+	
+	id = "elbsecid"
+
+}
+
+provider "aws"{
+
+	aws_access_key = "${var.aws_access_key}"
+	aws_secret_key = "${var.aws_secret_key}"
+	aws_region = "region of your choice"
+		
+}
+
+
+provisioner:{
+	script = [	
+			here we put the path to that script that installs apache .the script contain following command
+			apt-get update
+			apt-get install apache2 
+			service apache2 start
+]
+
+}
+
+Shell command:
+$export TF_VAR_aws_access_key = "access key"
+$export TF_VAR_aws_secret_key = "secret key"
+
+terraform init
+terraform plan
+terraform apply
+
