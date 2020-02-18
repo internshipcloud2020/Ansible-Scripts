@@ -1,0 +1,60 @@
+#Template for 2-tier,resource,traffic,ec2 key pair(in var),provisioners
+
+
+
+#variables.tf
+variable aws_access_key{}
+variable aws_secret_key{}
+variable region{
+
+	default = "us-east-1"
+}
+
+#Terminal 
+set TF_VARS_ams_access_key "YOUR_ACCESS_KEY"
+set TF_VARS_ams_secret_key "YOUR_SECRET_KEY"
+
+webserver_amis{
+	"us-east-1" = "d431b505"
+	"us-west-2" = "b821q341"
+	"ap-south-2" = "a890j133"
+	"au-central-1" = "b611p456"
+}
+
+#provider.tf
+provider "aws"{
+	access_key = "${var.aws_access_key}"
+	secret_key = "${var.aws_secret_key}"
+	region = "${var.webserver_amis,var.region}"
+}
+
+
+resource "aws_instance" "web_server"{
+	ami = "ami-d431b505"
+	instance_type = "t2.micro"
+	
+} 
+
+data "s3_bucket_storage" "bastion"{
+	#conditional
+	count = "${webserver.env.id="serv"?3:0}"
+	instance_type = "t2.large"
+	depends_on = "$[aws_instance.web_server.id]"
+}
+
+#IAM Policy template, policy.tpl
+resource "aws_instance" "aws_policy"{
+	Version = "2012-07-10"
+	acl =""
+	Statement = {[
+	Effect ="allow"
+	Action = {ec2.describe:Images,ec2.describe:Snapshots,ec2.describe:Drivers,ec2.describe:Access}
+	Resource :${arn}
+
+data "template file" = webserver policy template
+vars{
+$arn = ${aws_instance.web_server.arn}
+}
+
+}
+
