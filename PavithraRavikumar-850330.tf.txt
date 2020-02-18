@@ -1,0 +1,92 @@
+variable "aws_access_key"{}
+variable "aws_secret_key"{}
+
+variable "aws_region"{
+    default="us-east-1"
+}
+
+provider "aws"{
+    access_key="${var.aws_access_key}"
+    secret_key="${var.aws_secret_key}"
+    region="${var.aws_region}"
+}
+
+export TF_VAR_aws_access_key="fy8968hghyugkurdfkhr/"
+
+export TF_VAR_aws_secret_key="mfgj4253ljvkgk67368/grteodjgjh38"
+
+variable webserver_ami{
+    type="map"
+
+}
+
+webserver_ami{
+        "us-east-1"="ami-b2345d5a"
+        "ap-south-1"="ami-b4532c4b5"
+    }
+
+variable app_servers{
+    default="dev"
+}
+
+resource "aws_instance" "web_server"{
+    ami="${lookup(var.webserver_ami , var.aws_region)}"
+    instance_type="t2.micro"
+    count="${var.app_servers=="dev"?0:2}"
+    "resource" = "arn"
+}
+
+data "template_file" "ELB_serving_traffic"{
+    vars{
+        arn="${file($path.files/secur.tl)}"
+    }
+    
+}
+
+output "traffic"{
+    values="${data.template_file.serving_traffic.traffic_info}"
+}
+
+output "server"{
+    values="${aws_instance.web_server.*.public_id}"
+}
+
+resource "aws_subnet_instance" "web_subnet_instance"{
+        ami="${lookup(var.webserver_ami , var.aws_region)}"
+        instance_type="t2.micro"
+        subnet_id="${aws_subnet_instance.web_subnet_instance.id}"
+}
+
+data "template_file" "client_server"{
+    template="$$client_userid","$$client_accesskey","$$client_secretkey",
+              "$$server_userid","$$server_accesskey","$$server_secretkey"
+    vars{
+        client_userid="some_client"
+        client_accesskey="gfy5698/"
+        client_secretkey="5rgtr764ht/"
+        server_userid="some_server"
+        server_accesskey="fdty66"
+        server_secretkey="njk586/"
+ }
+
+}
+
+output "clientserver_tier"{
+    value="${data.template_file.client_server.public_id}"
+}
+
+resource "s3_bucket" "storeres"{
+    ami="${lookup(var.webserver_ami , var.aws_region)}"
+        instance_type="t2.micro"
+        depends_on="${aws_subnet_instance.id}"
+
+}
+
+output "server1"{
+    value="${s3_bucket.storeres.store_info}
+}
+
+
+
+
+
