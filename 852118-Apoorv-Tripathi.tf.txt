@@ -1,0 +1,118 @@
+
+#provider.tf
+
+provider "aws"
+{
+	access_key = "${var.access_key}"
+	secret_key = "${var.secret_key}"
+	region = "${var.region}"
+}
+
+
+
+$ssh-keygen -t rsa -b 4096 -f my_app_key
+
+
+
+
+#resource.tf
+
+
+resource "aws_key_pair" "my_app_key" 
+{
+	key_name = "${var.my_app_key}"
+	public_key = "${file("${path of public key file}")}"
+} 
+
+
+resource "aws_instance" "my_app" 
+{
+	key_name = "${aws_key_pair.my_app_key.key_name}"
+} 
+
+
+resource "aws_security_group" "my_app_sec_group"
+{ 
+ 	
+ 	ingress 
+	{
+ 		from_port = 0
+ 		to_port = 22
+ 		protocol = "tcp"
+ 		cidr_blocks = ["0.0.0.0/0"]
+ 	}
+	ingress 
+	{
+ 		from_port = 0
+ 		to_port = 80
+ 		protocol = "http"
+ 		cidr_blocks = ["0.0.0.0/0"]
+ 	}
+ 	egress
+	{
+ 		from_port = 0
+ 		to_port = 0
+ 		protocol = "-1"
+ 		cidr_blocks = ["0.0.0.0/0"]
+ 	} 
+}
+
+
+resource "aws_instance" "my_app"
+{
+	ami_id = "ami id"
+	instance_type = "t2.micro"
+	aws_security_group = "my_app_sec_group"
+	count = 2
+}
+
+resource "aws_elb" "my-elb" {
+  name = "my-elb"
+  instance = ["$(instance1)","$(instance2)"]
+  security_groups = ["${aws_security_group.my_app_sec_group}"]
+ listener {
+    instance_port = 80
+    instance_protocol = "http"
+    lb_port = 80
+    lb_protocol = "http"
+  }
+}
+
+provisioner "remote-exec"
+{
+	connection 
+	{
+ 		type = "ssh"
+ 		user = "ec2-user"
+ 		private_key = "${file("/path_to/my_app_key")}"
+ 	}
+}
+
+
+provisioner "remote-exec" {
+
+	inline [
+		"sudo yum install -y httpd",
+		"cp source destination" or "sudo apt-get install enginex",
+		"sudo service httpd start"
+	]
+}
+
+
+
+#variable.tf
+
+
+variable "my_map" 
+{
+	type="map"
+	default 
+	{
+		"access_key" = "your access key"
+		"key_name" = "your key name"
+		"key_path" = "path of your key file"
+		"secret_key" = "your secret key"
+	}
+}
+
+			
