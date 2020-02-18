@@ -1,0 +1,109 @@
+enginix
+elb
+
+
+provider "aws"
+{
+secret key="27189469"
+access key="5263136"
+region="us-east-1"
+}
+
+resource "aws_instance""two_tier"
+{
+ami=""
+instance_type="t2.micro"
+}
+
+
+
+resource "aws_instance""ip_address"
+{
+ami="${lookup(var.remote_access,var.aws_region)}"
+instance_type="
+}
+
+#template
+resource "aws_instance""template"
+{
+"Version":"1" 
+"Statement":
+"Effect": 
+"Action": 
+resource: "${arn}"
+}
+
+data "template_file" "webserver_policy" {
+
+template = "${file("${path.module}}"
+variable {
+arn = "${aws_instance.web_server.arn}"
+}
+}
+
+output "web_server_" {
+value 
+resource "aws_key_pair" "deployer-keypair" {
+key_name = "boostrap-key"
+public_key = 
+}
+resource "aws_key_pair" "mykey" {
+    key_name="data-pair"
+    public_key="${file(path.module)/fdemo.pub}"
+} 
+
+#provisence
+
+resource "aws_security_group" "web_server" {
+key_name = "name"
+ingress {
+from_port = 
+to_port =
+cider=[] 
+protocol = 
+
+}
+egress {
+from_port = 
+to_port = 
+cider=[]
+protocol = 
+ 
+}
+
+resource ""web_server"
+ {
+securityids =["${aws_security.web_server.id}"]
+}
+
+resource "aws_instance" "web_server"
+ {
+ami = "${lookup(var.webserver_amis,var.aws_region)}"
+instance_type = "t2.micro"
+
+subnet_id ="${aws_subnet.learntf_subnet.id}"
+key_name = "${aws_key_pair.}"
+security_ids ={"${aws_security.web_server_sec_group.id}"}
+depends_on = ["aws_s3_bucket]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
