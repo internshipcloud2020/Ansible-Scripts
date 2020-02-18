@@ -1,0 +1,3 @@
+access_key="key copied from aws credentials generated on cloud to access aws"
+private_key="key copied from aws credentials generated on cloud to configure app on aws"
+region="us-east-1"

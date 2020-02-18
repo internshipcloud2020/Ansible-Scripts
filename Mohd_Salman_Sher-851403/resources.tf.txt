@@ -1,0 +1,39 @@
+resource "aws_key" "Appkey" {
+  name = "Appkey"
+  public = "${file("${var.PATH}")}"
+}
+
+resource "aws_instance" "demo" {
+  ami = "${lookup(var.ami, var.region)}"
+  instance_type = "t2.micro"
+  name = "${aws_key.Appkey.name}"
+  
+ resource "aws_elb" "web" {
+  name = "terraform-elb"
+
+  subnets         = ["${0.0.0.0/0}"]
+  security_groups = ["${12345}"]
+  instances       = ["${in456tc}"]
+
+  listener {
+    instance_port     = 80
+    instance_protocol = "http"
+    lb_port           = 80
+    lb_protocol       = "http"
+
+  provisioner "script_file" {
+    source = "script.sh"
+    destination = "/PATH_OF_SCRIPT_FILE"
+  }
+  provisioner "outside_executables" {
+    inline = [
+      "chmod 600 [PATH_OF_SCRIPT]",
+      "sudo [PATH_OF_SCRIPT]"
+    ]
+  }
+  
+connection {
+    user = "${var.username}"
+    private = "${file("${var.PATH_OF_PRIVATE_KEY}")}"
+  }
+}
