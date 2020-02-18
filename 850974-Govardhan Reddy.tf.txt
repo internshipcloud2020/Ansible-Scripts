@@ -1,0 +1,84 @@
+#variables.tf
+#declaring variables aws credentials
+
+variable "aws_access_key" { }
+variable "aws_secret_access_key" { }
+variable "region" {
+	default="us-east-1"
+}
+
+
+#provider.tf
+
+provider "aws"{
+	access_key=${var.aws_access_key}
+	secret_key=${var.aws_secret_access_key}
+	region=${var.region}
+}
+
+#resource creation
+
+resource "aws_web_server"  "sample"{
+	ami= "<ami id>"
+	instance_type="t2.micro" #<type of ec2 instance>
+}
+
+provisioners "remote_exec" {
+	scripts{
+	/path/to/the/script/file/
+	.....}
+connection {
+	type=ssh
+	user="value"
+	password = "value" or public_key = " "
+	
+	ingress{
+	from_port="0"
+	to_port="22"
+	type = "tcp"
+	cldr = "0.0.0.0/0"
+}
+	egress{
+	from_port="o"
+	to_port="-1"
+	type="tcp"
+	cldr="0.0.0.0/0"
+}
+
+}
+
+}
+
+resource "aws_load_balancer" "elb"{
+	instance_type=" load_balancer"
+	ami = "<id>"
+	get = ${aws_web_server.sample.id[count]}
+}
+
+
+data "template"  "name"  "example"{
+	source = ${file(path/to/the/data/source/for/the/template)}
+	type="aws_two_tier"
+	#configuaration key value pairs required for the template
+	key = "value"
+}
+
+#command_line
+
+#initialize the terraform in the respective directory where the .tf files are stored by runnuing
+
+	terraform init
+
+#generate a public_key to establish ssh connection to remote resource by running
+
+	ssh-keygen -t rsa -b 1024 -f key_file
+
+#give the path of key_file to the variable public_key
+# see the resources that will get created and in which order they get created by running
+
+	terraform plan
+
+#now create the resources by running
+
+	terraform apply
+
