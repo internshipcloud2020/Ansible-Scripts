@@ -1,0 +1,106 @@
+/* Aim: Create a template for running a simple two-tier architecture on Amazon Web services. 
+The premise is that you have stateless app servers running behind an ELB serving traffic. */
+--------------------------------------
+#provider.tf
+
+provider "aws"{
+	access_key="${var.access_key}"
+	secret_key="${var.secret_key}"
+	region="${var.region}"
+}
+
+--------------------------------------
+#resource.tf
+    
+resource "aws_elb" "my-elb" {
+  name = "my-elb"
+  instances = ["${instance_1}", "${instance_2}"]
+  security_groups = ["${aws_security_group.elb-securitygroup.id}"]
+ listener {
+    instance_port = 80
+    instance_protocol = "http"
+    lb_port = 80
+    lb_protocol = "http"
+  }
+
+}
+
+resource "aws_key_pair" "aws_key"{
+	key_name="${var.key_pair_name}"
+	public_key="${file("${var.key_pair_path}")}"
+}
+
+#run the below command to generate a key-pair
+
+$ssh-keygen -t rsa -b 4096 -f aws_rsa_keyfile
+
+
+resource "aws_instance" "myec2_server" {
+	ami="${var.ami}"
+	instance_type="${var.instancetype}"
+	key_name = "${aws_key_pair.aws_key.my_name}"
+	aws_security_group="myec2_server_securitygroup"
+	count=2;
+	
+}
+
+resource "aws_security_group" "myec2_server_securitygroup" {
+ 	name = "web server security group"
+ 	
+	ingress {
+ 		from_port = 0
+ 		to_port = 80
+ 		protocol = "http"
+ 		cidr_blocks = ["0.0.0.0/0"]
+ 		}
+ 	egress {
+ 		from_port = 0
+ 		to_port = 0
+ 		protocol = "-1"
+ 		cidr_blocks = ["0.0.0.0/0"]
+ 		}
+} 
+-----------------------------
+#provisioner.tf
+
+
+provisioner "remote-exec"{
+ 	connection{
+		type="ssh"
+		user="ec2-user"
+		private_key="${file("/path_to/aws_rsa_keyfile)}"
+		}
+}
+
+provisioner "remote-exec"{
+	inline{
+			#commands
+	"sudo yum -y update"
+	"sudo yum install -y httpd",
+	"sudo service httpd start"
+			
+		}
+}
+
+----------------------------
+
+#Defining the variables
+#variables.tf
+
+
+
+variable "my_map"{
+	type="map"
+	default{
+		"ami"="machine image you want to create"
+		"instance_type"="t2.micro or any other type"
+		"key_pair_name"="my_key_pair"
+		"key_pair_path"="my_key_pair_path"
+		"access_key"="xxx"
+		"secret_key"="xxx"
+		"region"="us-east-1"
+		}
+	description=" variables to be used"
+}
+
+
