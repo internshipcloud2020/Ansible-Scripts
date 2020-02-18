@@ -1,0 +1,125 @@
+Create a template for running a 2-tier architecture on Amazon Web Services. 
+The application is stateless and is running behind ELB(Elastic Load Balancer) serving traffic.
+
+#provider.tf
+
+provider "aws"{
+	access_key="${var.my_access_key}>"	
+	secret_key="${var.my_secret_key}>"
+	region = "${var.AWS_REGION}"
+}
+
+#instance.tf and elb.tf
+
+resource "aws_elb" "my-elb" {
+  name = "my-elb"
+  subnets = ["${aws_subnet.main-public-1.id}", "${aws_subnet.main-public-2.id}"]
+  security_groups = ["${aws_security_group.elb-securitygroup.id}"]
+
+ listener {
+    instance_port = 80
+    instance_protocol = "http"
+    lb_port = 80
+    lb_protocol = "http"
+  }
+
+  health_check {
+    healthy_threshold = 2
+    unhealthy_threshold = 2
+    timeout = 3
+    target = "HTTP:80/"
+    interval = 30
+  }
+
+
+resource "aws_key_pair" "mykey" {
+  key_name = "mykey"
+  public_key = "${file("${var.PATH_TO_PUBLIC_KEY}")}"
+
+}
+
+resource "aws_instance" "example" {
+  ami = "${lookup(var.AMIS, var.AWS_REGION)}"
+  instance_type = "t2.micro"
+  key_name = "${aws_key_pair.mykey.key_name}"
+
+  provisioner "file" {
+    source = "script.sh"
+    destination = "/tmp/script.sh"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/script.sh",
+      "sudo /tmp/script.sh"
+    ]
+  }
+
+  connection {
+    user = "${var.INSTANCE_USERNAME}"
+    private_key = "${file("${var.PATH_TO_PRIVATE_KEY}")}"
+  }
+}
+
+#securitygroup.tf
+
+resource "security_group" "myinstance" {
+  name = "aws_instance"
+
+  egress {
+      from_port = 0
+      to_port = 22
+      protocol = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+      from_port = 0
+      to_port = 0
+      protocol = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+  }  
+}
+
+resource "aws_instance" "example" {
+  ami           = "${lookup(var.AMIS, var.AWS_REGION)}"
+  instance_type = "t2.micro"
+}
+
+#script.sh
+# install nginx
+
+apt-get update
+
+apt-get -y install nginx
+
+
+
+# make sure nginx is started
+
+service nginx start
+
+#variable.tf
+
+variable "AWS_REGION" {
+  default = "eu-west-1"
+}
+
+variable "PATH_TO_PRIVATE_KEY" {
+  default = "ananyakey"
+}
+
+variable "PATH_TO_PUBLIC_KEY" {
+  default = "pkey.pub"
+}
+
+variable "AMIS" {
+  type = "map"
+  default = {
+    us-east-1 = "ami-13be557e"
+    us-west-2 = "ami-06b94666"
+    eu-west-1 = "ami-844e0bf7"
+  }
+}
+
+
