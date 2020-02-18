@@ -1,0 +1,66 @@
+provider "aws"
+	{
+		access_key =""
+		secret_key =""
+		region ="$(var.awsregion}"
+	}
+
+variable "access_key" {}
+
+variable "secret_key"{}
+			
+variable "awsregion"
+	{
+		default ="us-east-1"
+	}
+
+
+variable "awsamis"
+	{
+		"us-east-1"="ami-534hg3sf"
+		"us-west-1"="ami-gj1gf65"
+		"us-south-1"="ami-sfg231j"
+	}
+
+
+resource "aws_instance" "resource1"
+	{
+		ami="$(lookup(var.awsamis,var.awsregion))"
+		instance_type ="t2.micro"
+		security_group_id=$(aws_security_group.awssg.id)
+		provisioner "remote-exec"	
+
+	connection
+	{
+		user="tanmay"
+		private_key="/user/lab1/key"
+		public_key="/user/lab1/key1.pub"
+	}
+	}
+
+
+
+
+resource "aws_security_group" "awssg"
+	{
+		name ="security group"
+		ingress
+			{
+ 				from_port=0
+				to_port=0
+				protocol ="tcp"
+				cider=["0.0.0.0/0"]
+			}
+		engress
+			{
+				from_port=0
+				to_port=0
+				protocol="-1"
+				cider=["0.0.0.0/0"]
+			}
+	}
+
+
+$export TF_VAR_access_key="your access key"
+$export TF_VAR_secret_key="your secret key"
+
