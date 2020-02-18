@@ -1,0 +1,100 @@
+#provider.tf
+
+provider "aws"{
+access_key="${var.aws_access_key}"
+secret_key="${var.aws_secret_key}"
+}
+
+
+#resource.tf
+resource "aws_instance" "terraformtest"{
+ami="${lookup(var.aws_amis, var.aws_region)}"
+instance_type="t2.micro"
+count="2"
+}
+
+resource "aws_security_group" "secgroup"{
+vpc_id="${aws_vpc}
+ingress{
+	from_port=0
+	to_port=22
+	protocol="tcp"
+	cdir_blocks=["0.0.0.0/0"]	
+	}
+egress{
+	from_port=0
+	to_port=22
+	protocol="-1"
+	cdir_blocks=["0.0.0.0/0"]
+	}
+}
+
+resource "aws_elb" "terraformelb"{
+name="terraformelb"
+security_groups=["${aws_security_group.aws.vpc}
+listener{
+	instance_port=80
+	instance_protocol="http"
+	lb_port=80
+	lb_protocol="http"
+}}
+
+
+#var.tf
+
+variable "aws_access_key" {
+default="$file("./home/desktop/access_key")"
+}
+
+variable "aws_secret_key" {
+default="$file("./home/desktop/secret_key")"
+}
+
+variable "aws_region" {
+
+default = "eu-west-1"
+
+}
+
+variable "aws_amis" {
+
+  type = "map"
+
+  default = {
+
+    us-east-1 = "ami-abcd1234"
+
+    us-west-2 = "ami-bcad1243"
+
+    eu-west-1 = "ami-cabd2143"
+
+  }
+
+}
+
+#provisioner.tf
+
+provisioner "file" {
+    source = "script.sh"
+    destination = "/tmp/script.sh"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/script.sh",
+      "sudo /tmp/script.sh"
+	"sudo install apache2 hhtpd"
+    ]
+
+  }
+
+  connection {
+    user = "${var.instance_user}"
+    private_key = "${file("${var.path_to_private_key}")}"
+  }
+}
+
+
+
+
+
