@@ -1,0 +1,53 @@
+#cloud provider						  5M
+provider "aws" {
+	access_key = "${var.aws_access_key}"
+	secret_key = "${var.aws_secret_key}"
+	region = "${var.aws_region}"
+}
+
+
+variable "aws_access_key" { }
+variable "aws_secret_key" { }
+variable "aws_region" {
+	default = "us-east-1"
+}
+
+
+
+#map
+variable "web_server_amis" {
+	us-east-1 = "b374d5a5"
+}
+
+#creating an instance                                    03M
+
+resource "aws_instance" "my_aws"{   
+	ami = "${lookup(var.web_server_amis, ${var.aws_region})}"
+	instance_type = "t2.micro"
+}
+
+
+var "target_env" {					 01M
+	target_env = "dev"
+}
+
+#provisioner
+
+provisioner "aws_server" "bastion 1"{                     02M
+	count = "${var.target_env == "dev" ? 0 : 1}"
+}
+
+resource "aws_security_group" "web_server_sec" {	  10M
+ name = "security group"
+ ingress {
+ 	from_port = 0
+ 	to_port = 80
+ 	cidr_blocks = ["0.0.0.0"]
+ }
+ egress {
+ 	from_port = 0
+ 	to_port = 0
+ 	cidr_blocks = ["0.0.0.0"]
+ }
+}
+
