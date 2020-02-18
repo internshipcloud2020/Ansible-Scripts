@@ -1,0 +1,70 @@
+provider "aws" {
+  access_key = "${var.aws_access_key}"
+  secret_key = "${var.aws_secret_key}"
+  region = "${var.aws_region}"
+}
+
+
+resource "aws_default_subnet" "learntf_default_subnet"
+{
+ availability _zone = "us-east-la"
+}
+
+
+resource "aws_instance" "web_server" {
+  ami = "ami-b7433864"
+  instance_type = "t2.micro"
+variable "aws_access_key" {}
+variable "aws_secret_key" {}
+variable "aws_region" {
+  default = "us-east-1"
+}
+
+
+
+"resource": "$(arn)"
+
+data "template file" "webserver_policy_template" {
+  template = "${file("$(path.module)/policy.tpl")}"
+vars {
+  arn = "${aws_instance.web_server.arn}"
+}
+}
+
+
+resource "aws_security_group" "web_server_security_group" {
+ name = "web server security group"
+
+ingress {
+  from_port = 0
+  to_port = 22  
+  protocol = "tcp"
+  cidr_blocks = ["0.0.0.0/0"]
+}
+
+egress {
+  from_port = 0
+  to_port = 80
+  protocol = "-1"
+  cidr_blocks = ["0.0.0.0/0"]
+}
+}
+
+
+provisioner "remote-exec" {
+  inline = [
+  "sudo yum install -y httpd",
+  "sudo service httpd start",
+  ]
+}
+
+
+resource "aws_key_pair" "developer-keypair" {
+  key_name = "bootstrap_key"
+  public_key = "${file("/path/to/aws_rsa.pub")}"
+}
+
+resource "aws_instance" "web_server" {
+   key_name = "${aws_key_pair.developer-keypair.key_name}"
+}
+
