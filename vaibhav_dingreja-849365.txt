@@ -1,0 +1,114 @@
+Create a template for running a simple two-tier architecture on Amazon Web services. 
+The premise is that you have stateless app servers running behind an ELB serving traffic.
+
+
+provider.tf
+provider "aws"
+{
+	access_key = "${var.access_key}"
+	secret_key = "${var.secret_key}"
+	region="${var.region}"
+}
+
+
+
+
+key_generation file
+//command to generate public and private key after this two files will be generated one with.pub and other with no extension.
+
+$ssh-keygen -t rsa -b 4456 -f aws_key_rsa
+
+
+
+
+resource.tf
+resource "aws_key_pair" "keypair"
+{
+	key_name="my_key"
+	public_key="${file("${/path/to/aws/public/key"})}"
+}
+//creating an instance
+resource "aws_instance" "my_app"
+{
+	ami = $(var.AMIS,var.AWS_REGION)
+	instance_type = "t2.micro"
+	key_name="${aws_key_pair.keypair.key_name}"
+	count=2
+	aws_security_group="web_Server_Sec_group"
+
+}
+
+
+
+	provisioner "remote-exec"
+	{
+	
+	inline[
+		"sudo apt-get update",
+	"sudo apt-get install enginex"
+	]
+
+	connection
+	{
+	user="${var.INSTANCE_USERNAME}"
+	private_key="${file("${var.Path/to/privatekey}")}"
+	}
+}
+
+
+
+//for allowing traffic ingress for incoming and engress for outgoing
+resource "aws_security_group" "web_Server_Sec_group"
+{
+	name="web_server_Security_group"
+	ingress
+	{
+	from_port=0
+	to_port=22
+	protocol="tcp"
+	cidr_blocks={0.0.0.0/0}
+	}
+	ingress
+	{
+	from_port=0
+	to_port=80
+	protocol="http"
+	cidr_blocks={0.0.0.0/0}
+	}
+	engress
+	{
+	from_port=0;
+	to_port=0;
+	protocol="-1"
+	cidr_blocks={"0.0.0.0/0"}
+	} 
+
+resource "aws_elb" "myelb"
+{
+	name="myelb"
+	instance=["$(instance1)","$(instance2)"]
+	security_groups=
+	listener
+	{
+		instance_port=80
+		instance_protocol="http"
+		lb_port=80
+		lb_protocol="http"
+	}
+	
+}
+
+
+variable.tf
+variable "my_map"
+	{
+		type="map"
+		default
+		{
+		"access_key"="your key"
+		"secret_key"="your_key"
+		 "key_name"="your key name"
+		"key_path"="your_path"
+		}
+	}
+
