@@ -1,0 +1,80 @@
+terraform
+
+provider.tf
+
+provider "aws"{                           5m
+    access_key = "$(var.access_key)"
+    secret_key = "$(var.secret_key)"
+    aws_region = "$(var.webserver_amis,var.region)"
+
+}
+
+providing the access and secret key from command line
+
+#IN WINDOWS
+set TF_VAR_access_key="***********"       5m
+set TF_VAR_secret_key="***********"       5m 
+
+#IN LINUX
+export TF_VAR_access_key="***********"
+export TF_VAR_secret_key="***********"
+
+resource.tf
+
+resource "aws_instance" "arun"{
+    ami = "*********" #machine image
+    instance_type = "t2.micro" #shape of the image
+    $count(number)<50?1:2
+    $count(number)<100 & $count(number)>50?3:2
+}
+
+variables.tf
+
+variables{
+    aws_region{
+        type = "map"
+    }
+    number
+}
+
+
+variables.tfvars
+
+variables "webserver_amis" "aws_region"{
+    "us-east-1" = "ami-******"
+    "us-west-1" = "ami-******"
+    "ap-south-1"= "ami-******"
+}
+
+provisioners "remote_exec" {         5m
+    scripts{
+        path......./enginx         
+    }
+    connection{
+        type = ssh
+        ingress{                     5m
+            from_port = 0
+            to_port = 22
+        }
+    }
+}
+
+
+execution procedure_1.:
+ terraform init
+ terraform plan
+    yes
+ terraform apply
+    yes
+ refresh your aws console screen to verify your instance
+ to destroy the instance 
+ terraform destroy
+
+by executing using above procedure instances will be created in al the regions
+
+
+execution procedure_2:
+terraform init
+terraform plan -var-aws-region="us-east-1"
+terraform apply -var-aws-region="us-east-1"
+terraform destroy -var-aws-region="us-east-1"
