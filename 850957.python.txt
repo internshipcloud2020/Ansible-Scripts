@@ -1,0 +1,13 @@
+#using boto3 creating a bucket
+#create a bucket
+import boto3
+s3=boto3.client('s3')
+s3.create_bucket(Bucket='my_bucket')
+
+#upload a file to a bucket using upload_file
+filename='file.txt'
+nucket_name='my_bucket'
+s3.upload_file(filename,bucket_name,filename)
+
+#uploading file to specific folder
+s3.metaclint.upload_file_name('/tmp/'+filename,'<bucket_name>',filename)
