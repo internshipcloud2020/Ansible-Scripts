@@ -1,0 +1,73 @@
+
+version :""
+configuration:""
+effect :"Allow"
+ec2 :instance{
+  variable aws_secret_key{}
+  variable aws_access_key{}
+  variable aws_region{
+      default=us-east-1
+
+  }
+ provider "aws"{
+     secret_key=" "
+     access _key=""
+     region="us-east-1"
+}
+resources "aws_instances" "myexample"{
+     instance_type="t2.micro"
+     ami=""
+
+}
+resources "aws_insatnces" "myexample2"{
+          instance type="t2.micro"
+          ami=""
+}
+    variable "map"{
+     type="size"
+     aim={"small","large","medium"}
+     }
+ resources "aws_instances" "myweb_server"{
+      instance="${var.aws_web_server,var.aws_region}
+      }
+      resources "aws-instances" "web_server"{
+      ami="${lookup{var.aws_insatnce,var.aws_region}}"
+      instance_type="t2.micro"
+      subnet_id="${lookup{var.webserver,var.aws_region}}"
+      }
+      resources "aws_instances" "public_ip"{
+          ami="${lookup{var.aws_webserer,aws_region}}"
+          count ="${var.aws_instances,var.public_ip}"
+      }
+      resources remote.exe{
+          inline template[
+
+sudo access_key=""
+sudo secret_key=""
+sudo aws_region=""
+sudo yum data
+          ]
+          count.index=2
+          instance_type="t2.micro"
+          ami="${var.aws_instance/file.tf/policy}
+      }
+
+resources "aws_instance"{
+
+ingress:
+  from port=4;
+   to  port=80;
+   exgress:
+    to=0;
+    from=1;
+    }
+
+
+    resources "aws_instances" "public_ip"{
+             instances_type="t2.micro"
+             ami="${lookup{var.aws_instances,var.public_ip}}"
+    }
+            
+       output aws_template{
+           value="{${var.aws_instances,var.aws_template.*.public_ip}}"       
+       }
