@@ -1,0 +1,30 @@
+
+import boto3
+
+from pprint import pprint
+
+from datetime import datetime
+
+
+
+def main(event, context):
+
+    ec2 = boto3.resource('ec2')
+
+    pprint(event)
+
+    instance_id = event['detail']['instance-id']
+
+    instance = ec2.Instance(instance_id)
+
+    date = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+    name = NAME_PREFIX+'-'+date
+
+    
+
+    print('Create image for '+instance_id+' with name '+name)
+
+    
+
+    image = instance.create_image(Name=name, Description='Image created automatically at '+date+' with name '+name+' following instance shut down')
