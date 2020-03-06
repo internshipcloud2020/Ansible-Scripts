@@ -1,0 +1,66 @@
+provider "aws" {
+region = "******" <#region of datacenter>
+access_key = "******" <#from EC2>
+secret_key = "******" <#from EC2>
+}
+
+resource "***" "***" {
+ami = "******" <#from instance>
+instance_type = "t2.micro"
+}
+
+output "*******" {
+key_value = "myec"
+}
+
+data "template" "example" {
+TPL = $(lookup{""})
+}
+
+
+
+# key_value pair code
+
+provisioner "remote-exec" {
+ami = "***"
+instance_type = "t2.micro"
+}
+
+connection {
+inline {
+sudo ... <# commands for nginix>
+type = "ssh"
+port = "28"
+private_key = "file(path).private_key.tfvars"
+}
+}
+
+ingress { <# for incoming traffic>
+from_port = 80
+to_port = 80
+type = "tcp"
+cidr_block = [0.0.0.0/0]
+}
+
+egress { <# for outgoing traffic>
+from_port = 448
+to_port = 448
+type = "tcp"
+cidr_block = [0.0.0.0/0]
+}
+
+resource "load_balancer" "***" {
+instance_type = "***"
+private_key = "$()"
+
+
+<#process>
+#create terraform program file and save it in folder
+#change the directory to folder of program
+#generate plugins for the code i.e., perform terraform init 
+#perform terraform plan 
+#perform terraform apply
+#now sucessfully an terffaform instance will be created 
+#then generate an nginix server using remote-exec code 
+#craete a templete and give the path of the nginix server code 
+#run both variables and provisioner code
