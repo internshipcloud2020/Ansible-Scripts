@@ -1,0 +1,8 @@
+import boto3
+# after including boto3 library we invoke resource() and pass name of resource 'ec2' as paramater 
+# this implies that it is going to use ec2 instances as resource taken into consideration
+ec2=boto3.resource('ec2')
+# below line creates an ec2 instance with specified parameters
+inst1=ec2.create_instance(ImageId='ami-0f3ge4jqz4344',MinCount=1,MaxCount=3,InstanceType='t2.micro',KeyName='key1',SubnetId='subnet-0hf432vdf4g54nc3')
+# displays the InstanceId of ec2 created
+print(inst1[0].id)
