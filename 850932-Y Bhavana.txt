@@ -1,0 +1,48 @@
+prov.tf
+
+ provider "aws"
+ access key = "${var.access_key}"
+ secret key = "${var.secret_key}
+ region = "${var.region}"
+
+In cmd
+set TF_VAR_access_key<"access_key">
+set TF_VAR_secret_key<"secret_key">
+
+res.tf
+resource "aws_instance" "web_server"
+ami="********"
+instance_type="t2.micro"
+subnet_id="${var.aws_default_subnet.aws_subnet_id}
+depends_on="${var.s3bucket.local_bins}
+
+variable=awis
+type=map
+
+variable "webservice_amis"
+"ua-east-1"=ami"b712e333"
+"ap-north-1"=ami"23868293"
+"ua-north-1"=ami"43575433"
+
+priviosners "remote_exec"{
+    script{
+        path/
+    }
+    connection{
+        ingress{
+            from_port = 1
+            to_port = 23
+            type=ssh
+            cdir=0.0.0.9
+        }
+        egress{
+            from_port =
+            to_port=
+            type=
+            cdir=
+
+        }
+    }
+    resource "aws_key_pair" "key_pair_id"
+    key_name="bootstrap"
+    value="
