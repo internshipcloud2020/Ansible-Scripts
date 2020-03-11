@@ -1,5 +1,6 @@
 import boto3 # including boto3 library and below line indicates that it is going to deal with ec2 # instances then onwards
 ec2=boto3.resource('ec2')
-ilis=['i-04jt64c2n3d00s53f']  # suppose this instance was created and now it will be destroyed by 
-$ below line
+iLis=['i-04jt64c2n3d00s53f']  # suppose this instance was created and now it will be destroyed by below line 
+# this is randomly assigned id to iLis and written by me
 ec2.instances.filter(InstanceId=iLis).terminate()
+# comments are added by me
